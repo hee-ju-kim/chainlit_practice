@@ -1,5 +1,5 @@
 from cryptography.fernet import Fernet
-from app.core.config import settings
+from app.config.config import settings
 import base64
 import hashlib
 

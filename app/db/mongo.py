@@ -1,8 +1,8 @@
 from pymongo import MongoClient
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.core.config import settings
-from app.utils.security import hash_password
+from app.config.config import settings
+from app.utils.jwt import hash_password
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
