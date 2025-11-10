@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>로그인</title>
+</head>
+<body>
+  <div
+    id="login"
+  >
+    <h2>로그인</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required/>
+      <input type="password" id="password" placeholder="Password" required/>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+
+  <iframe id="chatFrame" style="width:100vw; height:100vh; display:none;"></iframe>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, password })
+      });
+      const data = await res.json();
+      if(data.access_token){
+        // JWT 저장
+        localStorage.setItem('jwt_token', data.access_token);
+
+        const loginArea = document.getElementById('login');
+        loginArea.style.display = 'none';
+
+        // iframe으로 Chainlit 띄우기
+        const iframe = document.getElementById('chatFrame');
+        iframe.src = "http://localhost:8081";  // Chainlit 서버 URL
+        iframe.style.display = "block";
+
+        // 로그인 폼 숨기기
+        form.style.display = "none";
+      } else {
+        alert("로그인 실패");
+      }
+    });
+  </script>
+</body>
+</html>
