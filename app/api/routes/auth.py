@@ -13,16 +13,16 @@ async def login_page(request: Request):
 @router.post("/login")
 async def login(request: Request):
   users = request.app.state.users
-  data = await request.json()  # JSON body 읽기
-  id = data.get("id")
-  password = data.get("password")
+  data = await request.json()
+  id = data.get('id')
+  password = data.get('password')
   user = users.find_one({"id": id})
 
   if not user or not verify_password(password, user["password"]):
     return templates.TemplateResponse("login.html", {"request": request, "error": "아이디 또는 비밀번호가 틀렸습니다."})
 
-  access_token = create_access_token({"sub": id, "name": user["name"]})
-  return JSONResponse({"access_token": access_token})
+  token = create_access_token({"sub": id, "name": user["name"]})
+  return JSONResponse({"access_token": token})
 
 @router.post("/signup")
 async def signup(id: str = Form(...), password: str = Form(...), request: Request = None):

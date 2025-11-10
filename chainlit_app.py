@@ -1,7 +1,9 @@
 import chainlit as cl
 import os, json
 from app.utils.security import decode_access_token
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request
+
+app = FastAPI()
 
 CHAT_DIR = "chat_history"
 if not os.path.exists(CHAT_DIR):
@@ -29,13 +31,16 @@ def save_history(username, history):
 
 @cl.on_chat_start
 async def on_start():
-  print(cl.user_session)
-  token = cl.user_session.get("token")
 
+  print(vars(cl.user_session))
+  
+  cookies = cl.user_session.get("cookies")
+  token = cookies.get("access_token") if cookies else None
+  print(cookies)
+  
   if not token:
     await cl.Message("로그인이 필요합니다. 로그인 페이지로 이동합니다.").send()
-    response = RedirectResponse(url="http://localhost:8000", status_code=303)
-    return response
+    return 
 
   user_info = get_username_from_cookie(token)
   if not user_info:
@@ -61,11 +66,16 @@ async def on_start():
 async def on_message(message: cl.Message):
   username = cl.user_session.get("username", "anonymous")
   user_msg = message.content
-  response = f"{username}님, '{user_msg}'에 대한 답변입니다 😊"
 
   history = load_history(username)
   history.append({"author": username, "content": user_msg})
-  history.append({"author": "bot", "content": response})
   save_history(username, history)
 
-  await cl.Message(content=response).send()
+@app.post("/set_jwt")
+async def set_jwt(request: Request):
+  data = await request.json()
+  token = data.get("token")
+  if token:
+    cl.user_session.set("jwt_token", token)
+    return {"status": "ok"}
+  return {"status": "error", "message": "No token received"}
