@@ -9,6 +9,11 @@ class Settings(BaseSettings):
   JWT_ALGORITHM: str = "HS256"
   JWT_EXPIRE_MINUTES: int = 60
 
+  # Redis
+  REDIS_HOST: str = 'localhost'
+  REDIS_PORT: int = 6379
+  REDIS_EXPIRE: int = 30
+
   # 관리자 계정 정보
   ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
   ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "1234")

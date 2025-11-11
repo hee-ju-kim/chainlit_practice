@@ -1,6 +1,6 @@
 .env
 /.files
-/.chainlit
+/.chainlit/translations
 __pycache__/
 *.py[cod]
 *.pyo
