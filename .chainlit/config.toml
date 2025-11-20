@@ -112,7 +112,7 @@ cot = "full"
 custom_js = "/public/custom.js"
 
 # The style of alert boxes. Can be "classic" or "modern".
-alert_style = "classic"
+alert_style = "modern"
 
 # Specify additional attributes for custom JS file
 # custom_js_attributes = "async type = \"module\""
@@ -134,7 +134,7 @@ alert_style = "classic"
 logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
-default_avatar_file_url = ""
+default_avatar_file_url = "/public/roo2.png"
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.

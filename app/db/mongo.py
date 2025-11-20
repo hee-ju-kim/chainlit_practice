@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
   app.state.client = client
   app.state.db = db
   app.state.users = users_collection
-  app.state.chat = chat_collection
+  app.state.chats = chat_collection
 
   yield
 

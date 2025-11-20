@@ -5,26 +5,39 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import Runnable, RunnableConfig
+from typing import Optional
 
-import requests
+from http.cookies import SimpleCookie
+
 from typing import cast
 from app.utils.jwt import decode_access_token
 
-from urllib.parse import urlparse, parse_qs
-import httpx
+from fastapi import Request
+
 
 # 로거 수준 설정
-# logging.getLogger("uvicorn").setLevel(logging.ERROR)
-# logging.getLogger("uvicorn.access").setLevel(logging.ERROR)
+logging.getLogger("uvicorn").setLevel(logging.ERROR)
+logging.getLogger("uvicorn.access").setLevel(logging.ERROR)
 
 def get_username_from_cookie(token):
   payload = decode_access_token(token)
   print(payload)
   return payload.get("name") if payload else "anonymous"
 
+@cl.password_auth_callback
+def auth_callback(username: str, password: str):
+    # Fetch the user matching username from your database
+    # and compare the hashed password with the value stored in the database
+    if (username, password) == ("admin", "admin"):
+        return cl.User(
+            identifier="admin", metadata={"role": "admin", "provider": "credentials"}
+        )
+    else:
+        return None
+
 
 # @cl.on_chat_start
-# async def on_chat_start():
+# async def on_chat_start(req: Request):
 #   # ctx = cl.context
 #   # headers = dict(ctx.metadata.get("headers", {}))
 #   # cookies = headers.get("cookie")
@@ -32,6 +45,7 @@ def get_username_from_cookie(token):
 #   # await cl.Message(content=f"🍪 WebSocket Cookie 헤더:\n{cookies}").send()
 
 #   user_session = cl.user_session.get("request")
+#   print(req)
 #   print('dddd', user_session)
 #   print('asdfasdf', vars(cl.user_session))
 #   cookies = cl.user_session.get("access_token")
@@ -68,29 +82,6 @@ def get_username_from_cookie(token):
 #   cl.user_session.set("runnable", runnable)
 
 FASTAPI_BASE = "http://localhost:8000"  # FastAPI 서버 주소
-
-@cl.on_chat_start
-async def on_chat_start():
-	token = None
-	# custom_js.js에서 주입한 세션 접근
-	if hasattr(cl.user_session, "get"):
-		token = cl.user_session.get("token")
-
-	if not token:
-		await cl.Message(content="❌ 인증 토큰이 없습니다. 다시 로그인하세요.").send()
-		await cl.run_sync(cl.disconnect)
-		return
-
-	# FastAPI에 토큰 검증 요청
-	resp = requests.post(f"{FASTAPI_BASE}/verify-token", json={"token": token})
-
-	if resp.status_code != 200:
-			await cl.Message(content="❌ 토큰이 유효하지 않습니다. 다시 로그인해주세요.").send()
-			await cl.run_sync(cl.disconnect)
-			return
-
-	user = resp.json()["user"]
-	await cl.Message(content=f"✅ 인증 성공! 환영합니다, {user}님!").send()
 
 
 @cl.on_message
